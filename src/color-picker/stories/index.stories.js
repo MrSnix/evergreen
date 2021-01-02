@@ -1,7 +1,6 @@
 import { storiesOf } from '@storybook/react'
 import React, { useState } from 'react'
 import { ColorPicker, ColorPlane, ColorSlider, ColorSpectrum } from '..'
-import Box from 'ui-box'
 import { Heading, Label, Text } from '../../typography'
 import { Button } from '../../buttons'
 import { Pane } from '../../layers'
@@ -19,27 +18,27 @@ storiesOf('color-picker', module).add('ColorPicker', () => {
   const [orientation, setOrientation] = useState(HORIZONTAL)
 
   return (
-    <Box padding={40}>
-      <Heading marginBottom={8}>Color Spectrum</Heading>
+    <Pane padding={40}>
+      <Heading marginBottom={8}>Basic components</Heading>
       <Text is={'p'} marginTop={0}>
         Reusable component to build your custom color-picker
       </Text>
       <Label display={'block'} marginBottom={8}>
-        Area
+        Spectrum
       </Label>
       <ColorSpectrum onChange={e => setArea(e)} value={area} />
-      <Box marginTop={8}>
+      <Pane marginTop={8}>
         <Label display={'block'}>Event</Label>
         <Text>{JSON.stringify(area)}</Text>
-      </Box>
+      </Pane>
       <Label display={'block'} marginBottom={8} marginTop={16}>
         Plane
       </Label>
       <ColorPlane color={'#0084ff'} width={250} onChange={e => setPlane(e)} />
-      <Box marginTop={8}>
+      <Pane marginTop={8}>
         <Label display={'block'}>Event</Label>
         <Text>{JSON.stringify(plane)}</Text>
-      </Box>
+      </Pane>
       <Label display={'block'} marginBottom={8} marginTop={16}>
         Slider
       </Label>
@@ -48,10 +47,10 @@ storiesOf('color-picker', module).add('ColorPicker', () => {
         onChange={e => setSlider(e)}
         orientation={orientation}
       />
-      <Box marginTop={8}>
+      <Pane marginTop={8}>
         <Label display={'block'}>Event</Label>
         <Text>{JSON.stringify(slider)}</Text>
-      </Box>
+      </Pane>
       <Label display={'block'} marginTop={8}>
         Orientation
       </Label>
@@ -83,6 +82,6 @@ storiesOf('color-picker', module).add('ColorPicker', () => {
         value={advanced}
         mode={ADVANCED}
       />
-    </Box>
+    </Pane>
   )
 })

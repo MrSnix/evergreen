@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
-import { dimensions, layout, position, spacing, borders } from 'ui-box'
 import {
   getRelativeCoordinates,
   BLACK_AND_WHITE_LAYER,
@@ -22,27 +21,16 @@ const ColorSpectrum = memo(function ColorSpectrum(props) {
 
   const canvasRef = useRef()
 
+  const [isMouseDown, setMouseDown] = useState(false)
   const [pointer, setPointer] = useState({
-    style: {
-      color: 'white',
-      stroke: '#dddddd',
-      radius: 4,
-      shadow: {
-        color: '#707070',
-        size: 1
-      }
-    },
-    value: value || {
-      x: 0,
-      y: 0,
-      hex: '#ffffff',
-      rgb: {
-        r: 255,
-        g: 255,
-        b: 255
-      }
-    },
-    isMouseDown: false
+    x: 0,
+    y: 0,
+    hex: '#ffffff',
+    rgb: {
+      r: 255,
+      g: 255,
+      b: 255
+    }
   })
 
   const drawRainbow = (ctx, width, height) => {
@@ -72,8 +60,8 @@ const ColorSpectrum = memo(function ColorSpectrum(props) {
     drawRainbow(ctxCanvas, ctxCanvas.canvas.width, ctxCanvas.canvas.height)
     drawSelector(ctxCanvas, [pointer, setPointer])
     // Notify if there is an onChange handler
-    onChange && onChange(pointer.value)
-  }, [pointer.isMouseDown, pointer.value.x, pointer.value.y])
+    onChange && onChange(pointer)
+  }, [isMouseDown, pointer.x, pointer.y])
 
   return (
     <Pane
@@ -90,15 +78,12 @@ const ColorSpectrum = memo(function ColorSpectrum(props) {
         style={{ display: 'block' }}
         onMouseMove={e => {
           e.persist()
-          if (!disabled && pointer.isMouseDown) {
+          if (!disabled && isMouseDown) {
             setPointer(prev => {
               return {
                 ...prev,
-                value: {
-                  ...prev.value,
-                  x: getRelativeCoordinates(e, e.target).x,
-                  y: getRelativeCoordinates(e, e.target).y
-                }
+                x: getRelativeCoordinates(e, e.target).x,
+                y: getRelativeCoordinates(e, e.target).y
               }
             })
           }
@@ -107,38 +92,17 @@ const ColorSpectrum = memo(function ColorSpectrum(props) {
           e.persist()
           if (!disabled) {
             setPointer(prev => {
+              setMouseDown(true)
               return {
                 ...prev,
-                value: {
-                  ...prev.value,
-                  x: getRelativeCoordinates(e, e.target).x,
-                  y: getRelativeCoordinates(e, e.target).y
-                },
-                isMouseDown: true
+                x: getRelativeCoordinates(e, e.target).x,
+                y: getRelativeCoordinates(e, e.target).y
               }
             })
           }
         }}
-        onMouseUp={() => {
-          if (!disabled) {
-            setPointer(prev => {
-              return {
-                ...prev,
-                isMouseDown: false
-              }
-            })
-          }
-        }}
-        onMouseLeave={() => {
-          if (!disabled) {
-            setPointer(prev => {
-              return {
-                ...prev,
-                isMouseDown: false
-              }
-            })
-          }
-        }}
+        onMouseUp={() => !disabled && setMouseDown(false)}
+        onMouseLeave={() => !disabled && setMouseDown(false)}
       />
     </Pane>
   )
@@ -146,13 +110,9 @@ const ColorSpectrum = memo(function ColorSpectrum(props) {
 
 ColorSpectrum.propTypes = {
   /**
-   * Implements some APIs from ui-box.
+   * Implements <Pane /> prop-types.
    */
-  ...dimensions.propTypes,
-  ...spacing.propTypes,
-  ...position.propTypes,
-  ...layout.propTypes,
-  ...borders.propTypes,
+  ...Pane.propTypes,
   /**
    * The ColorPickerValue object to init the component
    */

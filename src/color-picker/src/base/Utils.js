@@ -27,6 +27,10 @@ export const BLACK_AND_WHITE_LAYER = [
   { offset: 1, color: 'rgba(0,0,0,1)' }
 ]
 
+/* ==================================================== */
+/* =================== <COLOR SPACE> ================== */
+/* ==================================================== */
+
 /**
  * Transform a single number to hex representation
  * @param n {number} The given number
@@ -51,7 +55,7 @@ export const fromRgbToHex = (r, g, b) => `#${toHex(r)}${toHex(g)}${toHex(b)}`
  * @param r The red value
  * @param g The green value
  * @param b The blue value
- * @returns {{s: number, v: number, h: number}}
+ * @returns {{h: number, s: number, v: number}}
  */
 export const rgb2hsv = (r, g, b) => {
   let rr, gg, bb, h, s
@@ -93,6 +97,10 @@ export const rgb2hsv = (r, g, b) => {
   }
 }
 
+/* ==================================================== */
+/* =================== <MOUSE INPUT> ================== */
+/* ==================================================== */
+
 /**
  * Returns an object containing mouse coordinates relative to the component
  * @param e The main event
@@ -127,55 +135,54 @@ export const ColorPickerMode = Object.freeze({
 /* ==================================================== */
 
 /**
+ * The basic rounded pointer-style
+ */
+export const rndPointer = {
+  color: 'white',
+  stroke: '#ffffff',
+  radius: 4
+}
+
+/**
  * Draw a simple selector on a 2D canvas
  * @param ctx The canvas context
  * @param pointer The pointer state getter
  * @param setPointer The pointer state setter
  */
 export const drawSelector = (ctx, [pointer, setPointer]) => {
-  const { style, value } = pointer
-  // Shadow
   ctx.beginPath()
-  ctx.arc(
-    value.x + style.shadow.size,
-    value.y + style.shadow.size,
-    style.radius,
-    0,
-    Math.PI * 2
-  )
-  ctx.fillStyle = style.shadow.color
-  ctx.fill()
-  ctx.closePath()
-  // Selector
-  ctx.beginPath()
-  ctx.arc(value.x, value.y, style.radius, 0, Math.PI * 2)
-  ctx.strokeStyle = style.stroke
-  ctx.fillStyle = style.color
-  ctx.fill()
+  ctx.arc(pointer.x, pointer.y, rndPointer.radius, 0, Math.PI * 2)
+  ctx.lineWidth = 2
+  ctx.strokeStyle = rndPointer.stroke
   ctx.stroke()
   ctx.closePath()
   // Returning current selected color (1x1 for one pixel)
-  const { data } = ctx.getImageData(
-    value.x + style.radius + style.shadow.size,
-    value.y + style.radius + style.shadow.size,
-    1,
-    1
-  )
+  const { data } = ctx.getImageData(pointer.x, pointer.y, 1, 1)
   // Updating state
   setPointer(prev => {
     return {
       ...prev,
-      value: {
-        ...prev.value,
-        hex: fromRgbToHex(data[0], data[1], data[2]),
-        rgb: {
-          r: data[0],
-          g: data[1],
-          b: data[2]
-        }
+      hex: fromRgbToHex(data[0], data[1], data[2]),
+      rgb: {
+        r: data[0],
+        g: data[1],
+        b: data[2]
       }
     }
   })
+}
+
+/**
+ * The basic square pointer-style
+ */
+export const sqrPointer = {
+  size: 4,
+  color: 'white',
+  stroke: '#dddddd',
+  shadow: {
+    color: '#707070',
+    size: 1
+  }
 }
 
 export const drawSlider = (
@@ -184,27 +191,36 @@ export const drawSlider = (
   orientation,
   referenceSize
 ) => {
-  const { style, value } = pointer
   const { HORIZONTAL, VERTICAL } = Orientation
   // Shadow
   ctx.beginPath()
   if (orientation === HORIZONTAL)
-    ctx.rect(value.pos + style.shadow.size, 0, style.size, referenceSize)
+    ctx.rect(
+      pointer.pos + sqrPointer.shadow.size,
+      0,
+      sqrPointer.size,
+      referenceSize
+    )
   else if (orientation === VERTICAL)
-    ctx.rect(0, value.pos + style.shadow.size, referenceSize, style.size)
-  ctx.fillStyle = style.shadow.color
+    ctx.rect(
+      0,
+      pointer.pos + sqrPointer.shadow.size,
+      referenceSize,
+      sqrPointer.size
+    )
+  ctx.fillStyle = sqrPointer.shadow.color
   ctx.fill()
   ctx.closePath()
   // Selector
   ctx.beginPath()
 
   if (orientation === HORIZONTAL)
-    ctx.rect(value.pos, 0, style.size, referenceSize)
+    ctx.rect(pointer.pos, 0, sqrPointer.size, referenceSize)
   else if (orientation === VERTICAL)
-    ctx.rect(0, value.pos, referenceSize, style.size)
+    ctx.rect(0, pointer.pos, referenceSize, sqrPointer.size)
 
-  ctx.strokeStyle = style.stroke
-  ctx.fillStyle = style.color
+  ctx.strokeStyle = sqrPointer.stroke
+  ctx.fillStyle = sqrPointer.color
   ctx.fill()
   ctx.stroke()
   ctx.closePath()
@@ -212,23 +228,28 @@ export const drawSlider = (
   // Returning current selected color (1x1 for one pixel)
   let data
   if (orientation === HORIZONTAL)
-    data = ctx.getImageData(value.pos + style.size + style.shadow.size, 0, 1, 1)
-      .data
+    data = ctx.getImageData(
+      pointer.pos + sqrPointer.size + sqrPointer.shadow.size,
+      0,
+      1,
+      1
+    ).data
   else if (orientation === VERTICAL)
-    data = ctx.getImageData(0, value.pos + style.size + style.shadow.size, 1, 1)
-      .data
+    data = ctx.getImageData(
+      0,
+      pointer.pos + sqrPointer.size + sqrPointer.shadow.size,
+      1,
+      1
+    ).data
   // Updating state
   setPointer(prev => {
     return {
       ...prev,
-      value: {
-        ...prev.value,
-        hex: fromRgbToHex(data[0], data[1], data[2]),
-        rgb: {
-          r: data[0],
-          g: data[1],
-          b: data[2]
-        }
+      hex: fromRgbToHex(data[0], data[1], data[2]),
+      rgb: {
+        r: data[0],
+        g: data[1],
+        b: data[2]
       }
     }
   })

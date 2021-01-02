@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
-import { dimensions, layout, position, spacing, borders } from 'ui-box'
 import { getRelativeCoordinates } from './Utils'
 import { Pane } from '../../../layers'
 import { drawSelector } from './Utils'
@@ -19,18 +18,10 @@ const ColorPlane = memo(function ColorPlane(props) {
 
   const canvasRef = useRef()
 
-  const [pointer, setPointer] = useState({
-    style: {
-      color: 'white',
-      stroke: '#dddddd',
-      radius: 4,
-      shadow: {
-        color: '#707070',
-        size: 1
-      }
-    },
-    value: value || {
-      x: width,
+  const [isMouseDown, setMouseDown] = useState(false)
+  const [pointer, setPointer] = useState(
+    value || {
+      x: width - 1,
       y: 0,
       hex: '#ffffff',
       rgb: {
@@ -38,9 +29,8 @@ const ColorPlane = memo(function ColorPlane(props) {
         g: 255,
         b: 255
       }
-    },
-    isMouseDown: false
-  })
+    }
+  )
 
   const drawPlane = (ctx, width, height) => {
     // Applying on canvas
@@ -70,9 +60,10 @@ const ColorPlane = memo(function ColorPlane(props) {
     drawPlane(ctxCanvas, ctxCanvas.canvas.width, ctxCanvas.canvas.height)
     drawSelector(ctxCanvas, [pointer, setPointer])
     // Notify if there is an onChange handler
-    onChange && onChange(pointer.value)
-  }, [pointer.value.x, pointer.value.y, pointer.value.hex, color])
+    onChange && onChange(pointer)
+  }, [pointer.x, pointer.y, pointer.hex, color])
 
+  // noinspection DuplicatedCode
   return (
     <Pane
       width={width}
@@ -88,15 +79,12 @@ const ColorPlane = memo(function ColorPlane(props) {
         style={{ display: 'block' }}
         onMouseMove={e => {
           e.persist()
-          if (!disabled && pointer.isMouseDown) {
+          if (!disabled && isMouseDown) {
             setPointer(prev => {
               return {
                 ...prev,
-                value: {
-                  ...prev.value,
-                  x: getRelativeCoordinates(e, e.target).x,
-                  y: getRelativeCoordinates(e, e.target).y
-                }
+                x: getRelativeCoordinates(e, e.target).x,
+                y: getRelativeCoordinates(e, e.target).y
               }
             })
           }
@@ -105,38 +93,17 @@ const ColorPlane = memo(function ColorPlane(props) {
           e.persist()
           if (!disabled) {
             setPointer(prev => {
+              setMouseDown(true)
               return {
                 ...prev,
-                value: {
-                  ...prev.value,
-                  x: getRelativeCoordinates(e, e.target).x,
-                  y: getRelativeCoordinates(e, e.target).y
-                },
-                isMouseDown: true
+                x: getRelativeCoordinates(e, e.target).x,
+                y: getRelativeCoordinates(e, e.target).y
               }
             })
           }
         }}
-        onMouseUp={() => {
-          if (!disabled) {
-            setPointer(prev => {
-              return {
-                ...prev,
-                isMouseDown: false
-              }
-            })
-          }
-        }}
-        onMouseLeave={() => {
-          if (!disabled) {
-            setPointer(prev => {
-              return {
-                ...prev,
-                isMouseDown: false
-              }
-            })
-          }
-        }}
+        onMouseUp={() => !disabled && setMouseDown(false)}
+        onMouseLeave={() => !disabled && setMouseDown(false)}
       />
     </Pane>
   )
@@ -144,13 +111,9 @@ const ColorPlane = memo(function ColorPlane(props) {
 
 ColorPlane.propTypes = {
   /**
-   * Implements some APIs from ui-box.
+   * Implements <Pane /> prop-types.
    */
-  ...dimensions.propTypes,
-  ...spacing.propTypes,
-  ...position.propTypes,
-  ...layout.propTypes,
-  ...borders.propTypes,
+  ...Pane.propTypes,
   /**
    * The ColorPickerValue object to init the component
    */

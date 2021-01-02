@@ -22,7 +22,7 @@ const ColorPicker = memo(function ColorPicker(props) {
       {...rest}
       content={
         <Pane padding={8}>
-          <Label display={'block'} marginBottom={4}>
+          <Label display={'block'} marginBottom={8}>
             Color Picker
           </Label>
           {mode === BASIC ? (
@@ -47,21 +47,13 @@ const ColorPicker = memo(function ColorPicker(props) {
               />
             </>
           )}
-          <Label display={'block'} marginBottom={4}>
-            Preview
-          </Label>
-          <Pane
-            border={'default'}
-            borderRadius={4}
-            marginBottom={8}
-            background={mode === BASIC ? value?.hex : plane?.hex}
-            height={25}
-          />
           {((mode === BASIC && details) || mode === ADVANCED) && (
             <Pane
               display={'flex'}
               justifyContent={'space-around'}
               alignItems={'center'}
+              marginTop={16}
+              marginBottom={4}
             >
               <Pane
                 display={'flex'}
@@ -114,6 +106,16 @@ const ColorPicker = memo(function ColorPicker(props) {
               </Pane>
             </Pane>
           )}
+          <Label display={'block'} marginBottom={4}>
+            Preview
+          </Label>
+          <Pane
+            border={'default'}
+            borderRadius={4}
+            marginBottom={8}
+            background={mode === BASIC ? value?.hex : plane?.hex}
+            height={25}
+          />
         </Pane>
       }
     >
